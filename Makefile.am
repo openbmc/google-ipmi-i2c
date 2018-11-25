@@ -1,3 +1,4 @@
+ACLOCAL_AMFLAGS = -I m4
 AM_DEFAULT_SOURCE_EXT = .cpp
 
 libi2ccmdsdir = ${libdir}/ipmid-providers
