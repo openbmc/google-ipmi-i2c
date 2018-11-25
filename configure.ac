@@ -21,6 +21,15 @@ AX_APPEND_COMPILE_FLAGS([-Wall -Werror], [CXXFLAGS])
 # Checks for libraries.
 AC_CHECK_HEADER([host-ipmid], [AC_MSG_ERROR(["phosphor-host-ipmid required and not found."])])
 
+# We require linux i2c functionality
+AC_CHECK_HEADERS([linux/i2c-dev.h], [], [
+  AC_MSG_ERROR([Could not find linux/i2c-dev.h])
+])
+AC_CHECK_HEADERS([linux/i2c.h], [], [
+  AC_MSG_ERROR([Could not find linux/i2c.h])
+])
+
+
 # Checks for library functions.
 LT_INIT # Required for systemd linking
 
