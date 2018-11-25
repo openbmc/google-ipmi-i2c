@@ -16,6 +16,7 @@ Makefile.in
 /autoscan.log
 /autoscan-*.log
 /aclocal.m4
+/build-aux
 /compile
 /config.guess
 /config.h.in
@@ -24,6 +25,7 @@ Makefile.in
 /configure.scan
 /depcomp
 /install-sh
+/m4
 /missing
 /stamp-h1
 
