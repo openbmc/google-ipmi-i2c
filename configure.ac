@@ -1,6 +1,6 @@
 # Initialization
 AC_PREREQ([2.69])
-AC_INIT([i2c-ipmi], [1.0], [https://www.github.com/google-ipmi-i2c/issues])
+AC_INIT([i2c-ipmi], [0.1], [https://www.github.com/google-ipmi-i2c/issues])
 AC_LANG([C++])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
