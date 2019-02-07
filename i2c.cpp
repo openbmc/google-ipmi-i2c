@@ -25,8 +25,8 @@
 #include <array>
 #include <cerrno>
 #include <cstring>
-#include <host-ipmid/iana.hpp>
-#include <host-ipmid/oemopenbmc.hpp>
+#include <ipmid/iana.hpp>
+#include <ipmid/oemopenbmc.hpp>
 #include <memory>
 
 namespace oem

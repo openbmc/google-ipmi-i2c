@@ -1,9 +1,9 @@
 #pragma once
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 
 #include <cstdint>
-#include <host-ipmid/oemrouter.hpp>
+#include <ipmid/oemrouter.hpp>
 
 using std::uint8_t;
 

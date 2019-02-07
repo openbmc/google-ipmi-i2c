@@ -19,7 +19,7 @@ AX_CXX_COMPILE_STDCXX_17([noext])
 AX_APPEND_COMPILE_FLAGS([-Wall -Werror], [CXXFLAGS])
 
 # Checks for libraries.
-AC_CHECK_HEADER([host-ipmid], [AC_MSG_ERROR(["phosphor-host-ipmid required and not found."])])
+PKG_CHECK_MODULES([LIBIPMID], [libipmid])
 
 # We require linux i2c functionality
 AC_CHECK_HEADERS([linux/i2c-dev.h], [], [
