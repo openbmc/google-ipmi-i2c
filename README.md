@@ -4,8 +4,6 @@ Authors: peterh@google.com
 
 Last Updated: 2017-05-16
 
-[TOC]
-
 ## Objective
 
 Provide a mechanism so that the host can manipulate I2C and SMBus devices on the
