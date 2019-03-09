@@ -1,0 +1,9 @@
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+2: Patrick Venture <venture@google.com>
+Ok-To-Test+1: Patrick Venture <venture@google.com>
+Verified+1: Patrick Venture <venture@google.com>
+Submitted-by: Patrick Venture <venture@google.com>
+Submitted-at: Sat, 09 Mar 2019 04:24:17 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/19100
+Project: openbmc/google-ipmi-i2c
+Branch: refs/heads/master
