@@ -67,27 +67,25 @@ Cmd      2 (openBmcI2cOemCmd)
 
 ##### Request Data
 
-byte(s) | type     | ID       | Description
-------- | -------- | -------- | ----------------------------------------
-0       | byte     | bus      | i2c adapater number at BMC
-1       | ReqFlags | reqFlags | Flags for request
-        |          |          | bit 7 - PEC flag for M_RECV_LEN transfer
-        |          |          | bits 6:0 - zero -reserved for future use
-2+      | Step     | -        | One per struct i2c_msg in transfer.
+| byte(s) | type     | ID       | Description
+| ------- | -------- | -------- | ----------------------------------------
+| 0       | byte     | bus      | i2c adapater number at BMC
+| 1       | ReqFlags | reqFlags | Flags for request
+|         |          |          | bit 7 - PEC flag for M_RECV_LEN transfer
+|         |          |          | bits 6:0 - zero -reserved for future use
+| 2+      | Step     | -        | One per struct i2c_msg in transfer.
 
 ##### Each Request Step
 
-| byte(s) | type      | ID        | Description                                |
-| ------- | --------- | --------- | ------------------------------------------ |
-| 0       | byte      | devAndDir | bit 0: 1 if step is read, 0 if write       |
-|         |           |           | bits 7:1 i2c device address                |
-| 1       | StepFlags | stepFlags | Flags fro each step                        |
-|         |           |           | bit 7: carries M_RECV_LEN bit - read steps |
-:         :           :           : only                                       :
-|         |           |           | bit 6: reserved for M_NOSTART              |
-| 2       | byte      | parm      | Transfer length (except M_RECV_LEN)        |
-| 3-p+2   | byte      | wr_data   | Write steps only: parm bytes of data to    |
-:         :           :           : write.                                     :
+| byte(s) | type      | ID        | Description                                     |
+| ------- | --------- | --------- | ------------------------------------------      |
+| 0       | byte      | devAndDir | bit 0: 1 if step is read, 0 if write            |
+|         |           |           | bits 7:1 i2c device address                     |
+| 1       | StepFlags | stepFlags | Flags fro each step                             |
+|         |           |           | bit 7: carries M_RECV_LEN bit - read steps only |
+|         |           |           | bit 6: reserved for M_NOSTART                   |
+| 2       | byte      | parm      | Transfer length (except M_RECV_LEN)             |
+| 3-p+2   | byte      | wr_data   | Write steps only: parm bytes of data to write.  |
 
 #### Response
 
