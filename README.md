@@ -67,12 +67,12 @@ Cmd      2 (openBmcI2cOemCmd)
 
 ##### Request Data
 
-byte(s) | type     | ID       | Description
-------- | -------- | -------- | ----------------------------------------
-0       | byte     | bus      | i2c adapater number at BMC
-1       | ReqFlags | reqFlags | Flags for request
-        |          |          | bit 7 - PEC flag for M_RECV_LEN transfer
-        |          |          | bits 6:0 - zero -reserved for future use
+| byte(s) | type     | ID       | Description
+| ------- | -------- | -------- | ----------------------------------------
+| 0       | byte     | bus      | i2c adapater number at BMC
+| 1       | ReqFlags | reqFlags | Flags for request
+|         |          |          | bit 7 - PEC flag for M_RECV_LEN transfer
+|         |          |          | bits 6:0 - zero -reserved for future use
 2+      | Step     | -        | One per struct i2c_msg in transfer.
 
 ##### Each Request Step
