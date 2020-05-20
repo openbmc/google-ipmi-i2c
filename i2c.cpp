@@ -24,6 +24,7 @@
 
 #include <array>
 #include <cerrno>
+#include <cstdio>
 #include <cstring>
 #include <ipmid/iana.hpp>
 #include <ipmid/oemopenbmc.hpp>
