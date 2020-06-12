@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b700c163_1692d627",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2020-06-12T08:09:15Z",
+      "side": 1,
+      "message": "nit: Does check header not produce a nice enough error message?",
+      "revId": "d0483356201ce0a5f92f7c0f24c8509010de3b75",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5037c19_f504feba",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2020-06-12T08:09:15Z",
+      "side": 1,
+      "message": "lto should be left to meson to enable as it has settings for this.",
+      "revId": "d0483356201ce0a5f92f7c0f24c8509010de3b75",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a55918bd_a41ed27a",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2020-06-12T08:09:15Z",
+      "side": 1,
+      "message": "You can avoid this with `soVersion` and `version` in the shared_module above.",
+      "revId": "d0483356201ce0a5f92f7c0f24c8509010de3b75",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
