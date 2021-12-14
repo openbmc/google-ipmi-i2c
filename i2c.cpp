@@ -241,8 +241,8 @@ static int openBus(BusId localbus)
 
 } // namespace i2c
 
-ipmi_ret_t I2c::transfer(ipmi_cmd_t cmd, const uint8_t* reqBuf,
-                         uint8_t* replyBuf, size_t* dataLen)
+ipmi_ret_t I2c::transfer(ipmi_cmd_t, const uint8_t* reqBuf, uint8_t* replyBuf,
+                         size_t* dataLen)
 {
     // Parse message header.
     auto reqLen = *dataLen;
