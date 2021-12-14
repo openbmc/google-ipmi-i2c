@@ -26,9 +26,12 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
+#include <ipmid/api-types.hpp>
+#include <ipmid/handler.hpp>
 #include <ipmid/iana.hpp>
 #include <ipmid/oemopenbmc.hpp>
 #include <memory>
+#include <span>
 
 namespace oem
 {
@@ -48,7 +51,7 @@ typedef std::array<uint8_t, maxRecvLenBuf> BlockBuf;
 
 struct ParsedStep
 {
-    const uint8_t* reqData;
+    std::span<const uint8_t> reqData;
     size_t length;
     DevAddr devAddr;
     bool isRead;
@@ -67,41 +70,41 @@ struct ParsedReq
     std::array<ParsedStep, maxSteps> step;
 };
 
-static ipmi_ret_t parseReqHdr(const uint8_t* reqBuf, size_t reqLen,
-                              size_t* bytesUsed, i2c::ParsedReq* req)
+ipmi::Cc parseReqHdr(std::span<const uint8_t> data, size_t* bytesUsed,
+                     i2c::ParsedReq* req)
 {
     // Request header selects bus & flags for operation;
     // additional bytes beyond are to be interpreted as steps.
-    if (reqLen < *bytesUsed + requestHeaderLen)
+    if (data.size() < *bytesUsed + requestHeaderLen)
     {
-        std::fprintf(stderr, "i2c::parse reqLen=%zu?\n", reqLen);
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        std::fprintf(stderr, "i2c::parse reqLen=%zu?\n", data.size());
+        return ipmi::ccReqDataLenInvalid;
     }
     // Deserialize request header bytes.
-    req->localbus = reqBuf[requestHeaderBus];
-    auto reqFlags = reqBuf[requestHeaderFlags];
+    req->localbus = data[requestHeaderBus];
+    auto reqFlags = data[requestHeaderFlags];
     *bytesUsed += requestHeaderLen;
 
     // Decode flags.
     req->usePec = !!(reqFlags & requestFlagsUsePec);
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 }
 
-static ipmi_ret_t parseReqStep(const uint8_t* reqBuf, size_t reqLen,
-                               size_t* bytesUsed, i2c::ParsedReq* req)
+ipmi::Cc parseReqStep(std::span<const uint8_t> data, size_t* bytesUsed,
+                      i2c::ParsedReq* req)
 {
-    size_t bytesLeft = reqLen - *bytesUsed;
+    size_t bytesLeft = data.size() - *bytesUsed;
     if (req->numSteps >= maxSteps || bytesLeft < stepHeaderLen)
     {
         std::fprintf(stderr, "i2c::parse[%zu] bytesLeft=%zu?\n", req->numSteps,
                      bytesLeft);
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        return ipmi::ccReqDataLenInvalid;
     }
-    const uint8_t* stepHdr = reqBuf + *bytesUsed;
+    const std::span<const uint8_t> stepHdr = data.subspan(*bytesUsed);
     auto step = &req->step[req->numSteps++];
 
     // Deserialize request step header bytes.
-    uint8_t devAndDir = stepHdr[stepHeaderDevAndDir];
+    uint8_t devAndDir = data[stepHeaderDevAndDir];
     uint8_t stepFlags = stepHdr[stepHeaderFlags];
     step->length = stepHdr[stepHeaderParm];
     bytesLeft -= stepHeaderLen;
@@ -129,40 +132,39 @@ static ipmi_ret_t parseReqStep(const uint8_t* reqBuf, size_t reqLen,
         {
             std::fprintf(stderr, "i2c::parse[%zu] bytesLeft=%zu, parm=%zu?\n",
                          req->numSteps, bytesLeft, step->length);
-            return IPMI_CC_REQ_DATA_LEN_INVALID;
+            return ipmi::ccReqDataLenInvalid;
         }
-        step->reqData = reqBuf + *bytesUsed;
+        step->reqData = data.subspan(*bytesUsed);
         *bytesUsed += step->length;
     }
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 }
 
 // Parse i2c request.
-static ipmi_ret_t parse(const uint8_t* reqBuf, size_t reqLen,
-                        i2c::ParsedReq* req)
+ipmi::Cc parse(std::span<const uint8_t> data, i2c::ParsedReq* req)
 {
     size_t bytesUsed = 0;
-    auto rc = parseReqHdr(reqBuf, reqLen, &bytesUsed, req);
-    if (rc != IPMI_CC_OK)
+    auto rc = parseReqHdr(data, &bytesUsed, req);
+    if (rc != ipmi::ccSuccess)
     {
         return rc;
     }
     do
     {
-        rc = parseReqStep(reqBuf, reqLen, &bytesUsed, req);
-        if (rc != IPMI_CC_OK)
+        rc = parseReqStep(data, &bytesUsed, req);
+        if (rc != ipmi::ccSuccess)
         {
             return rc;
         }
-    } while (bytesUsed < reqLen);
-    return IPMI_CC_OK;
+    } while (bytesUsed < data.size());
+    return ipmi::ccSuccess;
 }
 
 // Convert parsed request to I2C messages.
-static ipmi_ret_t buildI2cMsgs(const i2c::ParsedReq& req,
-                               std::unique_ptr<i2c::BlockBuf> rxBuf[],
-                               struct i2c_msg msgs[],
-                               struct i2c_rdwr_ioctl_data* msgset)
+static ipmi::Cc buildI2cMsgs(const i2c::ParsedReq& req,
+                             std::unique_ptr<i2c::BlockBuf> rxBuf[],
+                             struct i2c_msg msgs[],
+                             struct i2c_rdwr_ioctl_data* msgset)
 {
     size_t minReplyLen = 0;
 
@@ -176,7 +178,7 @@ static ipmi_ret_t buildI2cMsgs(const i2c::ParsedReq& req,
         {
             msg->flags = 0;
             msg->len = step.length;
-            msg->buf = const_cast<uint8_t*>(step.reqData);
+            msg->buf = const_cast<uint8_t*>(step.reqData.data());
             continue;
         }
         rxBuf[i] = std::make_unique<i2c::BlockBuf>();
@@ -209,7 +211,7 @@ static ipmi_ret_t buildI2cMsgs(const i2c::ParsedReq& req,
     if (minReplyLen > i2c::largestReply)
     {
         std::fprintf(stderr, "I2c::transfer minReplyLen=%zu?\n", minReplyLen);
-        return IPMI_CC_RESPONSE_ERROR; // Won't fit in response message
+        return ipmi::ccResponseError; // Won't fit in response message
     }
 
 #ifdef __IPMI_DEBUG__
@@ -221,7 +223,7 @@ static ipmi_ret_t buildI2cMsgs(const i2c::ParsedReq& req,
     }
 #endif
 
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 }
 
 static int openBus(BusId localbus)
@@ -241,17 +243,14 @@ static int openBus(BusId localbus)
 
 } // namespace i2c
 
-ipmi_ret_t I2c::transfer(ipmi_cmd_t, const uint8_t* reqBuf, uint8_t* replyBuf,
-                         size_t* dataLen)
+Resp I2c::transfer(::ipmi::Context::ptr, std::span<const uint8_t> data)
 {
     // Parse message header.
-    auto reqLen = *dataLen;
-    *dataLen = 0;
     i2c::ParsedReq req = {};
-    auto rc = parse(reqBuf, reqLen, &req);
-    if (rc != IPMI_CC_OK)
+    auto rc = parse(data, &req);
+    if (rc != ipmi::ccSuccess)
     {
-        return rc;
+        return ipmi::response(rc);
     }
 
     // Build full msgset
@@ -262,16 +261,16 @@ ipmi_ret_t I2c::transfer(ipmi_cmd_t, const uint8_t* reqBuf, uint8_t* replyBuf,
         .nmsgs = 0,
     };
     rc = buildI2cMsgs(req, rxBuf, msgs, &msgset);
-    if (rc != IPMI_CC_OK)
+    if (rc != ipmi::ccSuccess)
     {
-        return rc;
+        return ipmi::response(rc);
     }
 
     // Try to open i2c bus
     int busFd = i2c::openBus(req.localbus);
     if (busFd < 0)
     {
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
     int ioError = ioctl(busFd, I2C_RDWR, &msgset);
 
@@ -280,11 +279,11 @@ ipmi_ret_t I2c::transfer(ipmi_cmd_t, const uint8_t* reqBuf, uint8_t* replyBuf,
     if (ioError < 0)
     {
         std::fprintf(stderr, "I2c::transfer I2C_RDWR ioError=%d?\n", ioError);
-        return IPMI_CC_UNSPECIFIED_ERROR; // I2C_RDWR I/O error
+        return ipmi::responseUnspecifiedError(); // I2C_RDWR I/O error
     }
 
     // If we read any data, append it, in the order we read it.
-    uint8_t* nextReplyByte = replyBuf;
+    std::vector<uint8_t> output;
     size_t replyLen = 0;
     for (size_t i = 0; i < req.numSteps; ++i)
     {
@@ -299,30 +298,32 @@ ipmi_ret_t I2c::transfer(ipmi_cmd_t, const uint8_t* reqBuf, uint8_t* replyBuf,
             {
                 std::fprintf(stderr, "I2c::transfer[%zu] replyLen=%zu?\n", i,
                              replyLen);
-                return IPMI_CC_RESPONSE_ERROR; // Won't fit in response message
+                return ipmi::responseUnspecifiedError(); // Won't fit in
+                                                         // response message
             }
-            std::memcpy(nextReplyByte, msg->buf, lenRead);
-            nextReplyByte += lenRead;
+            output.resize(output.size() + lenRead);
+            std::memcpy(output.data() + output.size() - lenRead, msg->buf,
+                        lenRead);
         }
     }
-    *dataLen = replyLen;
-    return IPMI_CC_OK;
+    return ::ipmi::responseSuccess(output);
 }
 
-void I2c::registerWith(Router* oemRouter)
+void I2c::registerOemRouter()
 {
-    Handler f = [this](ipmi_cmd_t cmd, const uint8_t* reqBuf, uint8_t* replyBuf,
-                       size_t* dataLen) {
-        return transfer(cmd, reqBuf, replyBuf, dataLen);
+    auto handler = [this](ipmi::Context::ptr ctx, std::vector<uint8_t> data) {
+        return transfer(ctx, data);
     };
 
     std::fprintf(stderr, "Registering OEM:[%#08X], Cmd:[%#04X] for I2C\n",
                  googOemNumber, Cmd::i2cCmd);
-    oemRouter->registerHandler(googOemNumber, Cmd::i2cCmd, f);
+    ipmi::registerOemHandler(::ipmi::prioOemBase, oem::googOemNumber,
+                             Cmd::i2cCmd, ::ipmi::Privilege::User, handler);
 
     std::fprintf(stderr, "Registering OEM:[%#08X], Cmd:[%#04X] for I2C\n",
                  obmcOemNumber, Cmd::i2cCmd);
-    oemRouter->registerHandler(obmcOemNumber, Cmd::i2cCmd, f);
+    ipmi::registerOemHandler(::ipmi::prioOemBase, oem::obmcOemNumber,
+                             Cmd::i2cCmd, ::ipmi::Privilege::User, handler);
 }
 
 namespace i2c
@@ -334,7 +335,7 @@ void setupGlobalOemI2c() __attribute__((constructor));
 void setupGlobalOemI2c()
 {
     globalOemI2c = std::make_unique<I2c>();
-    globalOemI2c->registerWith(oem::mutableRouter());
+    globalOemI2c->registerOemRouter();
 }
 } // namespace i2c
 } // namespace oem
