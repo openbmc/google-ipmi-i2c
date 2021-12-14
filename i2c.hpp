@@ -3,7 +3,10 @@
 #include <ipmid/api.h>
 
 #include <cstdint>
-#include <ipmid/oemrouter.hpp>
+#include <ipmid/api-types.hpp>
+#include <ipmid/message.hpp>
+#include <span>
+#include <vector>
 
 using std::uint8_t;
 
@@ -45,6 +48,8 @@ constexpr size_t largestReply = 34;
 
 } // namespace i2c
 
+using Resp = ipmi::RspType<std::vector<uint8_t>>;
+
 /**
  * I2c is a global i2c-via-ipmi manager and IPMI handler.
  */
@@ -52,23 +57,18 @@ class I2c
 {
   public:
     /**
-     * Allows specification of the mechanism to register OEM IPMI handler.
-     *
-     * @param[in] oemRouter - A pointer to a router instance.
+     * Register OEM IPMI handler.
      */
-    void registerWith(Router* oemRouter);
+    void registerOemRouter();
 
     /**
      * The i2c-via-ipmi commands go through this method.
      *
-     * @param[in] cmd - the IPMI command.
-     * @param[in] reqBuf - the IPMI command buffer.
-     * @param[in,out] replyBuf - the IPMI response buffer.
-     * @param[in,out] dataLen - pointer to request length, set to reply length.
-     * @return IPMI return code.
+     * @param[in] ctx - IPMI Request Context.
+     * @param[in] data - Request Data.
+     * @return IPMI response.
      */
-    ipmi_ret_t transfer(ipmi_cmd_t cmd, const uint8_t* reqBuf,
-                        uint8_t* replyBuf, size_t* dataLen);
+    Resp transfer(ipmi::Context::ptr ctx, std::span<const uint8_t> data);
 };
 
 } // namespace oem
