@@ -32,7 +32,6 @@
 # data within them will be kept sorted.
 
 owners:
-- venture@google.com
 - wak@google.com
 
 reviewers:
@@ -40,9 +39,6 @@ reviewers:
 matches:
 
 openbmc:
-- name: Patrick Venture
-  email: venture@google.com
-  discord: Venture
 - name: William Kennington
   email: wak@google.com
   discord: wak
