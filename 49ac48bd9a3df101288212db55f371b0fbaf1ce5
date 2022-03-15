@@ -1,0 +1,7 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: William A. Kennington III <wak@google.com>
+Submitted-by: Willy Tu <wltu@google.com>
+Submitted-at: Tue, 15 Mar 2022 22:00:55 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/google-ipmi-i2c/+/49672
+Project: openbmc/google-ipmi-i2c
+Branch: refs/heads/master
