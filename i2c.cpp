@@ -104,7 +104,7 @@ ipmi::Cc parseReqStep(std::span<const uint8_t> data, size_t* bytesUsed,
     auto step = &req->step[req->numSteps++];
 
     // Deserialize request step header bytes.
-    uint8_t devAndDir = data[stepHeaderDevAndDir];
+    uint8_t devAndDir = stepHdr[stepHeaderDevAndDir];
     uint8_t stepFlags = stepHdr[stepHeaderFlags];
     step->length = stepHdr[stepHeaderParm];
     bytesLeft -= stepHeaderLen;
