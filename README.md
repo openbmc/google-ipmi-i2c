@@ -50,10 +50,10 @@ I2C device drivers at the host to connect to actual devices on the BMC.
 
 ### IPMID OEM Command Extension Routing
 
-*   Register wildcard command handler for any OEM Group Extension request (netfn
-    0x2e, cmd 0xff)
-*   Provide for registration of OEN, command pairs
-*   Route received requests to registered handler
+- Register wildcard command handler for any OEM Group Extension request (netfn
+  0x2e, cmd 0xff)
+- Provide for registration of OEN, command pairs
+- Route received requests to registered handler
 
 ### IPMID Messages
 
@@ -67,18 +67,18 @@ Cmd      2 (openBmcI2cOemCmd)
 
 ##### Request Data
 
-| byte(s) | type     | ID       | Description
-| ------- | -------- | -------- | ----------------------------------------
-| 0       | byte     | bus      | i2c adapater number at BMC
-| 1       | ReqFlags | reqFlags | Flags for request
-|         |          |          | bit 7 - PEC flag for M_RECV_LEN transfer
-|         |          |          | bits 6:0 - zero -reserved for future use
-| 2+      | Step     | -        | One per struct i2c_msg in transfer.
+| byte(s) | type     | ID       | Description                              |
+| ------- | -------- | -------- | ---------------------------------------- |
+| 0       | byte     | bus      | i2c adapater number at BMC               |
+| 1       | ReqFlags | reqFlags | Flags for request                        |
+|         |          |          | bit 7 - PEC flag for M_RECV_LEN transfer |
+|         |          |          | bits 6:0 - zero -reserved for future use |
+| 2+      | Step     | -        | One per struct i2c_msg in transfer.      |
 
 ##### Each Request Step
 
 | byte(s) | type      | ID        | Description                                     |
-| ------- | --------- | --------- | ------------------------------------------      |
+| ------- | --------- | --------- | ----------------------------------------------- |
 | 0       | byte      | devAndDir | bit 0: 1 if step is read, 0 if write            |
 |         |           |           | bits 7:1 i2c device address                     |
 | 1       | StepFlags | stepFlags | Flags fro each step                             |
@@ -135,25 +135,25 @@ write step bytes
 
 Hopefully you can see how to modify these commands in simple ways:
 
-*   Use a different BMC bus or device address.
-*   Change the data byte to select a different starting register, other than 15.
-*   Change the read step length to read more/fewer bytes, but note max is 32.
+- Use a different BMC bus or device address.
+- Change the data byte to select a different starting register, other than 15.
+- Change the read step length to read more/fewer bytes, but note max is 32.
 
 More advanced ideas
 
-*   Skip the read step & add more data bytes to write to selected address.
-*   Zero length read / write step do quick write 1 / 0, respectively
+- Skip the read step & add more data bytes to write to selected address.
+- Zero length read / write step do quick write 1 / 0, respectively
 
 ### IPMID OpenBMC I2C Command Extension
 
-*   Register handler for OpenBmc I2c Oem Extension requests
-*   Handle I2C transfer request
-    *   Decode message information
-    *   Convert request steps to struct i2c_msg array entries
-        *   Adjust M_RCV_LEN steps for IOCTL
-    *   Perform I2C_RDWR ioctl on associated I2C bus
-    *   Return nonzero completion code upon errors; or
-    *   Append all bytes read into one reply upon success
+- Register handler for OpenBmc I2c Oem Extension requests
+- Handle I2C transfer request
+  - Decode message information
+  - Convert request steps to struct i2c_msg array entries
+    - Adjust M_RCV_LEN steps for IOCTL
+  - Perform I2C_RDWR ioctl on associated I2C bus
+  - Return nonzero completion code upon errors; or
+  - Append all bytes read into one reply upon success
 
 ### Prodkernel i2c-via-ipmi Proxy Platform Driver
 
@@ -161,28 +161,27 @@ More advanced ideas
 
 Platform device attributes at /sys/devices/platform/i2c-via-ipmi/${name}
 
-*   name - identifies proxy (BMC's i2c bus number)
+- name - identifies proxy (BMC's i2c bus number)
 
 #### Proxy Operation
 
 ##### I2C Adapter Instance
 
-*   Host tool performs I/O on this interface
-*   Implements master_xfer method
+- Host tool performs I/O on this interface
+- Implements master_xfer method
 
 ##### IPMI User Instance
 
-*   Supports IPMI messaging
-*   Implements ipmi_recv_hndl callback
+- Supports IPMI messaging
+- Implements ipmi_recv_hndl callback
 
 ##### I2C master_xfer logic
 
-*   Convert struct i2c_msg array to IPMI request
-*   Send request & wait for completion
+- Convert struct i2c_msg array to IPMI request
+- Send request & wait for completion
 
 ##### IPMI ipmi_recv_hndl logic
 
-*   Check everything possible to ensure this is a reply to our request
-*   Copy received bytes to user buffer(s)
-*   Declare completion
-
+- Check everything possible to ensure this is a reply to our request
+- Copy received bytes to user buffer(s)
+- Declare completion
