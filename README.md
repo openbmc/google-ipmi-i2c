@@ -69,7 +69,7 @@ Cmd      2 (openBmcI2cOemCmd)
 
 | byte(s) | type     | ID       | Description                              |
 | ------- | -------- | -------- | ---------------------------------------- |
-| 0       | byte     | bus      | i2c adapater number at BMC               |
+| 0       | byte     | bus      | i2c adapter number at BMC                |
 | 1       | ReqFlags | reqFlags | Flags for request                        |
 |         |          |          | bit 7 - PEC flag for M_RECV_LEN transfer |
 |         |          |          | bits 6:0 - zero -reserved for future use |
