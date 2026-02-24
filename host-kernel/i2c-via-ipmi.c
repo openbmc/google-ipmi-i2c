@@ -113,7 +113,7 @@
  * IPMI user and related addressing information tie the proxy to the
  * IPMI messaging service, and thence the BMC.
  *
- * The msgs and req related properties convery i2c xfer arguments to the
+ * The msgs and req related properties convert i2c xfer arguments to the
  * reply handler, while the completion properties flow back from the reply
  * handler to the i2c xfer operation that launched the request.
  */
@@ -432,7 +432,7 @@ static int i2c_via_ipmi_xfer(struct i2c_adapter *adap,
 	 * completion or timeout, so any later response will be dropped.
 	 * Upon timeout, the cmd_cc state seeded here will remain.
 	 * The spinlock is held here while advancing ipmi_seq, and in the
-	 * IPMI resonse handler while relying upon the match.
+	 * IPMI response handler while relying upon the match.
 	 */
 	bus->cmd_rc = -ETIMEDOUT;
 	reinit_completion(&bus->cmd_complete);
