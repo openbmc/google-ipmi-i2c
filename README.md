@@ -1,6 +1,6 @@
 # I2C via IPMI Proxy Adapter
 
-Authors: peterh@google.com
+Authors: <peterh@google.com>
 
 Last Updated: 2017-05-16
 
@@ -59,7 +59,7 @@ I2C device drivers at the host to connect to actual devices on the BMC.
 
 #### Request
 
-```
+```text
 NetFn    0x2e
 OemGroup 49871
 Cmd      2 (openBmcI2cOemCmd)
@@ -89,7 +89,7 @@ Cmd      2 (openBmcI2cOemCmd)
 
 #### Response
 
-```
+```text
 NetFn    0x2e
 OemGroup 49871
 Cmd      2 (openBmcI2cOemCmd)
@@ -101,7 +101,7 @@ Data     Only if successful: all bytes read, in order received.
 
 `i2c-1 0x50 FRU EEPROM`
 
-```
+```text
 Content, trailing zero bytes omitted.
 # i2cdump -f -y 1 0x50 b
      0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f    0123456789abcdef
